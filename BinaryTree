@@ -1,0 +1,164 @@
+ ✅ Binary Tree Preorder Traversal — Easy
+
+Concept: Recursion + Helper Pattern
+
+Created a separate helper() to pass the ans list around
+Base case: root == null → stop
+Order: add node first, then recurse left, then right
+That "add first" is what makes it Preorder
+
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public List<Integer> preorderTraversal(TreeNode root) {
+        ArrayList<Integer> ans = new ArrayList<>();
+        helper(root , ans);
+        return ans;
+    }
+    public void helper(TreeNode root , List<Integer> ans){
+        if(root == null) return;
+        ans.add(root.val);
+        helper(root.left , ans);
+        helper(root.right , ans);
+
+
+
+    }
+}
+
+
+
+✅ Lowest Common Ancestor of a Binary Tree — Medium
+
+Concept: Post-order thinking + Bubble up
+
+Search left and right subtrees for p and q
+3 cases:
+
+Found p or q → return it immediately
+Both sides return non-null → current node is LCA
+One side null → return the non-null side
+
+
+The answer bubbles up from bottom to top
+
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if(root == null) return root;
+        if(root == p || root == q) return root;
+        TreeNode l = lowestCommonAncestor(root.left , p, q);
+        TreeNode r = lowestCommonAncestor(root.right , p,q);
+        if(l != null && r != null) return root;
+        return (l ==null) ? r : l; 
+        
+    }
+}
+
+✅ Flatten Binary Tree to Linked List — Medium  
+
+Concept: Recursion + Pointer Rewiring (Morris style)
+
+Save left and right subtrees before touching anything
+Flatten both subtrees independently first
+Then attach: root.right = flattened left
+Walk to the end of that chain, attach flattened right
+Much cleaner than the list approach — no extra space!
+
+class Solution {
+    public static void flatten(Node root) {
+        // code here
+        if(root == null) return;
+        Node lst = root.left;
+        Node rst = root.right;
+        root.left = null;
+        root.right = null;
+        flatten(lst);
+        flatten(rst);
+        root.right = lst;
+        Node last = root;
+        while(last.right != null){
+          last =  last.right ;
+        }
+        last.right = rst;
+        
+    }
+}
+
+✅ Min Distance Between Two Nodes — Hard
+
+Concept: LCA + Level tracking via DFS
+
+Reused LCA logic from problem 2 ♻️
+Then ran DFS from LCA, tracking depth with level
+When node a found → store level in dist[0]
+When node b found → store level in dist[1]
+Answer = dist[0] + dist[1] (both distances from LCA)
+
+Formula behind it:
+dist(a, b) = dist(LCA→a) + dist(LCA→b)
+
+
+/* A binary tree node
+class Node {
+    public int data;
+    public Node left;
+    public Node right;
+
+    public Node(int val) {
+        data = val;
+        left = null;
+        right = null;
+    }
+}
+*/
+
+class Solution {
+     int findDist(Node root, int a, int b) {
+      Node LCA = lca(root, a , b);
+      int [] dist = {0,0};
+      dfs(LCA, 0, a, b, dist);
+      return dist[0] + dist[1];
+        
+    }
+    
+     Node lca(Node root, int p, int q) {
+      if(root == null) return null;
+      if(root.data == p || root.data == q) return root;
+      Node l = lca(root.left , p , q);
+      Node r = lca(root.right ,p,q);
+      if(l != null && r != null) return root;
+      return (l== null) ? r : l;
+        
+    }
+    
+     void dfs(Node root , int level, int p , int q , int[] dist){
+        if(root == null) return;
+        if(root.data == p) dist[0] = level;
+        if(root.data == q) dist[1] = level;
+        dfs(root.left ,level +1 , p, q, dist );
+        dfs(root.right , level +1 , p,q , dist);
+        
+    }
+}
